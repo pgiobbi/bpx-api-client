@@ -1,5 +1,6 @@
 use rust_decimal::Decimal;
 use serde::{Deserialize, Serialize};
+use crate::order::Side;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -25,6 +26,19 @@ pub struct AccountSettings {
 pub struct AccountMaxBorrow {
     pub max_borrow_quantity: Decimal,
     pub symbol: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AccountMaxOrder {
+    pub(crate) auto_borrow: Option<bool>,
+    pub(crate) auto_borrow_repay: Option<bool>,
+    pub(crate) auto_lend_redeem: Option<bool>,
+    pub(crate) max_order_quantity: Decimal,
+    pub(crate) price: Option<Decimal>,
+    pub(crate) side: Side,
+    pub(crate) symbol: String,
+    pub(crate) reduce_only: Option<bool>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
