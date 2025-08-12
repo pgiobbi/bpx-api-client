@@ -1,6 +1,7 @@
 use rust_decimal::Decimal;
 use serde::{Deserialize, Serialize};
-
+use strum::{Display, EnumString};
+use crate::margin::MarginFunction;
 use crate::Blockchain;
 
 /// An asset is most of the time a crypto coin that can have multiple representations
@@ -72,6 +73,17 @@ pub struct TickerUpdate {
     pub timestamp: u64,
 }
 
+#[derive(Debug, Display, Clone, Copy, Serialize, Deserialize, EnumString, PartialEq, Eq, Hash)]
+#[strum(serialize_all = "PascalCase")]
+#[serde(rename_all = "PascalCase")]
+pub enum OrderBookState {
+    Open,
+    Closed,
+    CancelOnly,
+    LimitOnly,
+    PostOnly,
+}
+
 /// A market is where two assets are exchanged. Most notably, in a `BTC/USDC` pair
 /// `BTC` is the base and `USDC` is the quote.
 #[derive(Debug, Serialize, Deserialize)]
@@ -87,6 +99,22 @@ pub struct Market {
     pub market_type: MarketType,
     /// See [`MarketFilters`].
     pub filters: MarketFilters,
+    /// IMF function.
+    pub imf_function: Option<MarginFunction>,
+    /// MMF function.
+    pub mmf_function: Option<MarginFunction>,
+    /// Funding interval for perpetuals in milliseconds.
+    pub funding_interval: Option<u64>,
+    /// Funding rate upper bound for perpetual markets. In basis points. E.g. 10 = 10bps
+    pub funding_rate_upper_bound: Option<Decimal>,
+    /// Funding rate lower bound for perpetual markets. In basis points. E.g. -10 = -10bps
+    pub funding_rate_lower_bound: Option<Decimal>,
+    /// Maximum open interest limit for the market if the market is a future.
+    pub open_interest_limit: Option<Decimal>,
+    /// The order book state.
+    pub order_book_state: OrderBookState,
+    /// Market created at time.
+    pub created_at: chrono::NaiveDateTime,
 }
 
 impl Market {
@@ -108,24 +136,74 @@ impl Market {
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct MarketFilters {
+    /// Defines the price rules for the order book.
     pub price: PriceFilters,
+    /// Defines the quantity rules for the order book.
     pub quantity: QuantityFilters,
     pub leverage: Option<LeverageFilters>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+pub struct PriceBandMarkPrice {
+    /// Maximum allowed multiplier move from mean price.
+    pub max_multiplier: Decimal,
+    /// Minimum allowed multiplier move from mean price.
+    pub min_multiplier: Decimal,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct PriceBandMeanPremium {
+    /// Maximum allowed deviation from the mean premium. E.g. if tolerance_pct is 0.05 (5%), and
+    /// the mean premium is 5%, then orders will be prevented from being placed if the premium
+    /// exceeds 10%.
+    pub tolerance_pct: Decimal,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct PriceFilters {
+    /// Minimum price the order book will allow.
     pub min_price: Decimal,
+    /// Maximum price the order book will allow.
     pub max_price: Option<Decimal>,
+    /// Price increment.
     pub tick_size: Decimal,
+    /// Maximum allowed multiplier from last active price.
+    pub max_multiplier: Option<Decimal>,
+    /// Minimum allowed multiplier from last active price.
+    pub min_multiplier: Option<Decimal>,
+    /// Maximum allowed impact multiplier from best offer. This determines how far above the best
+    /// ask a market buy can penetrate.
+    pub max_impact_multiplier: Option<Decimal>,
+    /// Minimum allowed impact multiplier from best bid. This determines how far below the best
+    /// bid a market sell can penetrate.
+    pub min_impact_multiplier: Option<Decimal>,
+    /// Futures price band. Used to determine how far the price is allowed to deviate from the mean
+    /// mark price.
+    pub mean_mark_price_band: Option<PriceBandMarkPrice>,
+    /// Futures price band. Used to determine how far the premium is allowed to deviate from the
+    /// mean premium.
+    pub mean_premium_band: Option<PriceBandMeanPremium>,
+    /// Maximum allowed multiplier move from last active price without incurring an entry fee for
+    /// spot margin.
+    pub borrow_entry_fee_max_multiplier: Option<Decimal>,
+    /// Minimum allowed multiplier move from last active price without incurring an entry fee for
+    /// spot margin.
+    pub borrow_entry_fee_min_multiplier: Option<Decimal>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct QuantityFilters {
+    /// Minimum quantity the order book will allow. For futures, this will be the threshold at
+    /// which a position gets closed and so it should be as close as possible, preferably equal, to
+    /// the step_size.
     pub min_quantity: Decimal,
+    /// Maximum quantity the order book will allow.
     pub max_quantity: Option<Decimal>,
+    /// Quantity increment.
     pub step_size: Decimal,
 }
 
@@ -276,6 +354,14 @@ mod test {
                     min_price: dec!(0.0001),
                     max_price: None,
                     tick_size: dec!(0.0001),
+                    max_multiplier: None,
+                    min_multiplier: None,
+                    max_impact_multiplier: None,
+                    min_impact_multiplier: None,
+                    mean_mark_price_band: None,
+                    mean_premium_band: None,
+                    borrow_entry_fee_max_multiplier: None,
+                    borrow_entry_fee_min_multiplier: None,
                 },
                 quantity: QuantityFilters {
                     min_quantity: dec!(0.01),
@@ -284,6 +370,14 @@ mod test {
                 },
                 leverage: None,
             },
+            imf_function: None,
+            mmf_function: None,
+            funding_interval: None,
+            funding_rate_upper_bound: None,
+            funding_rate_lower_bound: None,
+            open_interest_limit: None,
+            order_book_state: OrderBookState::Open,
+            created_at: Default::default(),
         }
     }
 
