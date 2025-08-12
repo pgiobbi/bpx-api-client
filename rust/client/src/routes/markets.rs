@@ -4,6 +4,7 @@ use crate::error::Result;
 use crate::BpxClient;
 
 const API_ASSETS: &str = "/api/v1/assets";
+const API_MARKET: &str = "/api/v1/market";
 const API_MARKETS: &str = "/api/v1/markets";
 const API_TICKER: &str = "/api/v1/ticker";
 const API_TICKERS: &str = "/api/v1/tickers";
@@ -20,6 +21,13 @@ impl BpxClient {
         res.json().await.map_err(Into::into)
     }
 
+    /// Retrieves the market for a given symbol.
+    pub async fn get_market(&self, symbol: &str) -> Result<Market> {
+        let url = format!("{}{}?symbol={}", self.base_url, API_MARKET, symbol);
+        let res = self.get(url).await?;
+        res.json().await.map_err(Into::into)
+    }
+    
     /// Retrieves a list of available markets.
     pub async fn get_markets(&self) -> Result<Vec<Market>> {
         let url = format!("{}{}", self.base_url, API_MARKETS);
