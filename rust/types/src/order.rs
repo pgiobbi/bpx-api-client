@@ -412,6 +412,26 @@ pub struct OrderUpdate {
     pub related_order_id: Option<u64>,
 }
 
+#[derive(Deserialize, Debug)]
+pub struct BulkOrderResponseError {
+    pub code: String,
+    pub message: String,
+}
+
+#[derive(Deserialize, Debug)]
+#[serde(untagged)]
+pub enum BulkOrderResponse {
+    Success(Order),
+    Error(BulkOrderResponseError),
+}
+
+#[derive(Deserialize, Debug)]
+#[serde(untagged)]
+pub enum BulkOrdersResponse {
+    Results(Vec<BulkOrderResponse>),
+    Error(BulkOrderResponseError),
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

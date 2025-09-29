@@ -258,6 +258,7 @@ impl BpxClient {
             API_ORDER if method == Method::POST => "orderExecute",
             API_ORDER if method == Method::DELETE => "orderCancel",
             API_ORDERS if method == Method::GET => "orderQueryAll",
+            API_ORDERS if method == Method::POST => "orderExecute",
             API_ORDERS if method == Method::DELETE => "orderCancelAll",
             API_RFQ if method == Method::POST => "rfqSubmit",
             API_RFQ_QUOTE if method == Method::POST => "quoteSubmit",
@@ -281,28 +282,50 @@ impl BpxClient {
         };
 
         let query_params = url.query_pairs().collect::<BTreeMap<Cow<'_, str>, Cow<'_, str>>>();
-        let body_params = if let Some(payload) = payload {
-            let s = serde_json::to_value(payload)?;
-            match s {
-                Value::Object(map) => map
-                    .into_iter()
-                    .map(|(k, v)| (k, v.to_string()))
-                    .collect::<BTreeMap<_, _>>(),
-                _ => return Err(Error::InvalidRequest("payload must be a JSON object".into())),
-            }
-        } else {
-            BTreeMap::new()
-        };
 
         let timestamp = now_millis();
-        let mut signee = format!("instruction={instruction}");
+        let mut signee = String::new();
+
+        if let Some(payload_ref) = payload {
+            let s = serde_json::to_value(payload_ref)?;
+
+            if instruction == "orderExecute" && matches!(s, Value::Array(_)) {
+                // Batch order execution
+                if let Value::Array(arr) = s {
+                    let mut parts: Vec<String> = Vec::new();
+                    for item in arr {
+                        let map = self.to_sorted_map(&item)?;
+                        let params_str = map
+                            .iter()
+                            .map(|(k, v)| format!("{k}={v}"))
+                            .collect::<Vec<_>>()
+                            .join("&");
+                        parts.push(format!("instruction=orderExecute&{params_str}"));
+                    }
+                    signee.push_str(&parts.join("&"));
+                }
+            } else {
+                // Normal case
+                signee.push_str(&format!("instruction={instruction}"));
+                if let Value::Object(_) = s {
+                    let map = self.to_sorted_map(&s)?;
+                    for (k, v) in map {
+                        signee.push_str(&format!("&{k}={v}"));
+                    }
+                } else {
+                    return Err(Error::InvalidRequest(
+                        "payload must be a JSON object or array for batch orders".into(),
+                    ));
+                }
+            }
+        } else {
+            signee.push_str(&format!("instruction={instruction}"));
+        }
+
         for (k, v) in query_params {
             signee.push_str(&format!("&{k}={v}"));
         }
-        for (k, v) in body_params {
-            let v = v.trim_start_matches('"').trim_end_matches('"');
-            signee.push_str(&format!("&{k}={v}"));
-        }
+
         signee.push_str(&format!("&timestamp={timestamp}&window={DEFAULT_WINDOW}"));
         tracing::debug!("signee: {}", signee);
 
@@ -323,6 +346,20 @@ impl BpxClient {
             req.headers_mut().insert(CONTENT_TYPE, JSON_CONTENT.parse()?);
         }
         Ok(req)
+    }
+
+    fn to_sorted_map(&self, value: &Value) -> Result<BTreeMap<String, String>> {
+        if let Value::Object(map) = value {
+            let mut bmap: BTreeMap<String, String> = BTreeMap::new();
+            for (k, v) in map {
+                let val_str = v.to_string();
+                let trimmed = val_str.trim_start_matches('"').trim_end_matches('"').to_string();
+                bmap.insert(k.clone(), trimmed);
+            }
+            Ok(bmap)
+        } else {
+            Err(Error::InvalidRequest("expected JSON object".into()))
+        }
     }
 }
 

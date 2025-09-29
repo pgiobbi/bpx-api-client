@@ -1,4 +1,6 @@
-use bpx_api_types::order::{CancelOpenOrdersPayload, CancelOrderPayload, ExecuteOrderPayload, Order};
+use bpx_api_types::order::{
+    BulkOrderResponse, BulkOrdersResponse, CancelOpenOrdersPayload, CancelOrderPayload, ExecuteOrderPayload, Order,
+};
 
 use crate::error::{Error, Result};
 use crate::BpxClient;
@@ -29,6 +31,34 @@ impl BpxClient {
         let endpoint = format!("{}{}", self.base_url, API_ORDER);
         let res = self.post(endpoint, payload).await?;
         res.json().await.map_err(Into::into)
+    }
+
+    /// Submits a set of orders to the matching engine for execution in a batch.
+    pub async fn execute_orders(&self, payload: Vec<ExecuteOrderPayload>) -> Result<Vec<Result<Order>>> {
+        let endpoint = format!("{}{}", self.base_url, API_ORDERS);
+        let res = self.post(endpoint, payload).await?;
+        match res.json().await.map_err(Into::<Error>::into)? {
+            BulkOrdersResponse::Results(items) => {
+                let mut results = Vec::with_capacity(items.len());
+                for item in items {
+                    let r = match item {
+                        BulkOrderResponse::Success(order) => Ok(order),
+                        BulkOrderResponse::Error(api_err) => Err(Error::BpxApiError {
+                            // The error code is not sent in the response, so we have to pretend it
+                            // is a 400 Bad Request.
+                            status_code: reqwest::StatusCode::BAD_REQUEST,
+                            message: format!("{}: {}", api_err.code, api_err.message).into_boxed_str(),
+                        }),
+                    };
+                    results.push(r);
+                }
+                Ok(results)
+            }
+            BulkOrdersResponse::Error(api_err) => Err(Error::BpxApiError {
+                status_code: reqwest::StatusCode::BAD_REQUEST,
+                message: format!("{}: {}", api_err.code, api_err.message).into_boxed_str(),
+            }),
+        }
     }
 
     /// Cancels a specific order by symbol and either order ID or client ID.
