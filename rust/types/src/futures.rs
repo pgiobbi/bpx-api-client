@@ -99,6 +99,7 @@ pub struct PositionUpdate {
     pub timestamp: u64,
 
     /// Estimated liquidation price
+    #[deprecated]
     #[serde(rename = "l")]
     pub est_liquidation_price: Option<Decimal>,
 }

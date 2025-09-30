@@ -15,7 +15,8 @@ pub struct Asset {
     tokens: Vec<Token>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Display, Clone, Copy, Serialize, Deserialize, EnumString, PartialEq, Eq, Hash)]
+#[strum(serialize_all = "UPPERCASE")]
 #[serde(rename_all = "UPPERCASE")]
 pub enum MarketType {
     Spot,
@@ -73,6 +74,51 @@ pub struct TickerUpdate {
     pub timestamp: u64,
 }
 
+/// Ticker stream pushes 24hr rolling statistics for a single symbol every second.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct TickerStatisticsUpdate {
+    /// Event type
+    #[serde(rename = "e")]
+    pub event_type: String,
+
+    /// Event timestamp in microseconds
+    #[serde(rename = "E")]
+    pub event_time: i64,
+
+    /// Symbol
+    #[serde(rename = "s")]
+    pub symbol: String,
+
+    /// First price
+    #[serde(rename = "o")]
+    pub first_price: Decimal,
+
+    /// Last price
+    #[serde(rename = "c")]
+    pub last_price: Decimal,
+
+    /// High price
+    #[serde(rename = "h")]
+    pub high_price: Decimal,
+
+    /// Low price
+    #[serde(rename = "l")]
+    pub low_price: Decimal,
+
+    /// Base asset volume
+    #[serde(rename = "v")]
+    pub base_asset_volume: Decimal,
+
+    /// Quote asset volume
+    #[serde(rename = "V")]
+    pub quote_asset_volume: Decimal,
+
+    /// Number of trades
+    #[serde(rename = "n")]
+    pub number_of_trades: u64,
+}
+
 #[derive(Debug, Display, Clone, Copy, Serialize, Deserialize, EnumString, PartialEq, Eq, Hash)]
 #[strum(serialize_all = "PascalCase")]
 #[serde(rename_all = "PascalCase")]
@@ -86,7 +132,7 @@ pub enum OrderBookState {
 
 /// A market is where two assets are exchanged. Most notably, in a `BTC/USDC` pair
 /// `BTC` is the base and `USDC` is the quote.
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Market {
     /// The `Market` identifier.
@@ -133,7 +179,7 @@ impl Market {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct MarketFilters {
     /// Defines the price rules for the order book.
@@ -143,7 +189,7 @@ pub struct MarketFilters {
     pub leverage: Option<LeverageFilters>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct PriceBandMarkPrice {
     /// Maximum allowed multiplier move from mean price.
@@ -152,7 +198,7 @@ pub struct PriceBandMarkPrice {
     pub min_multiplier: Decimal,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct PriceBandMeanPremium {
     /// Maximum allowed deviation from the mean premium. E.g. if tolerance_pct is 0.05 (5%), and
@@ -161,7 +207,7 @@ pub struct PriceBandMeanPremium {
     pub tolerance_pct: Decimal,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct PriceFilters {
     /// Minimum price the order book will allow.
@@ -194,7 +240,7 @@ pub struct PriceFilters {
     pub borrow_entry_fee_min_multiplier: Option<Decimal>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct QuantityFilters {
     /// Minimum quantity the order book will allow. For futures, this will be the threshold at
@@ -207,7 +253,7 @@ pub struct QuantityFilters {
     pub step_size: Decimal,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct LeverageFilters {
     pub min_leverage: Decimal,
