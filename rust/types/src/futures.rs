@@ -103,3 +103,24 @@ pub struct PositionUpdate {
     #[serde(rename = "l")]
     pub est_liquidation_price: Option<Decimal>,
 }
+
+/// Open interest updates are pushed to the openInterest stream every 60 seconds.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct OpenInterestUpdate {
+    /// Event type
+    #[serde(rename = "e")]
+    pub event_type: String,
+
+    /// Event timestamp in microseconds
+    #[serde(rename = "E")]
+    pub event_time: i64,
+
+    /// Symbol
+    #[serde(rename = "s")]
+    pub symbol: String,
+
+    /// Open interest in contracts
+    #[serde(rename = "o")]
+    pub open_interest: Decimal,
+}
