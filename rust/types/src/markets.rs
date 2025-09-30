@@ -330,6 +330,59 @@ pub struct Kline {
     pub trades: u64,
 }
 
+/// Ticker stream pushes 24hr rolling statistics for a single symbol every second.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct KlineUpdate {
+    /// Event type
+    #[serde(rename = "e")]
+    pub event_type: String,
+
+    /// Event timestamp in microseconds
+    #[serde(rename = "E")]
+    pub event_time: i64,
+
+    /// Symbol
+    #[serde(rename = "s")]
+    pub symbol: String,
+
+    /// K-Line start time in seconds
+    #[serde(rename = "t")]
+    pub start: i64,
+
+    /// K-Line close time in seconds
+    #[serde(rename = "T")]
+    pub end: i64,
+
+    /// Open price
+    #[serde(rename = "o")]
+    pub open: Decimal,
+
+    /// Open price
+    #[serde(rename = "c")]
+    pub close: Decimal,
+
+    /// High price
+    #[serde(rename = "h")]
+    pub high: Decimal,
+
+    /// Low price
+    #[serde(rename = "l")]
+    pub low: Decimal,
+
+    /// Base asset volume
+    #[serde(rename = "v")]
+    pub base_asset_volume: Decimal,
+
+    /// Number of trades
+    #[serde(rename = "n")]
+    pub number_of_trades: u64,
+
+    /// Is this k-line closed?
+    #[serde(rename = "X")]
+    pub is_closed: bool,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct FundingRate {
