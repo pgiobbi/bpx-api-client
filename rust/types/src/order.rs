@@ -194,6 +194,15 @@ pub enum SelfTradePrevention {
 #[derive(Debug, Display, Clone, Copy, Serialize, Deserialize, Default, EnumString, PartialEq, Eq, Hash)]
 #[strum(serialize_all = "PascalCase")]
 #[serde(rename_all = "PascalCase")]
+pub enum SlippageToleranceType {
+    #[default]
+    TickSize,
+    Percent,
+}
+
+#[derive(Debug, Display, Clone, Copy, Serialize, Deserialize, Default, EnumString, PartialEq, Eq, Hash)]
+#[strum(serialize_all = "PascalCase")]
+#[serde(rename_all = "PascalCase")]
 pub enum OrderStatus {
     Cancelled,
     Expired,
@@ -226,6 +235,8 @@ pub struct ExecuteOrderPayload {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub auto_borrow_repay: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    pub broker_id: Option<u16>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub client_id: Option<u32>,
     pub order_type: OrderType,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -237,9 +248,23 @@ pub struct ExecuteOrderPayload {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub quote_quantity: Option<Decimal>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    pub reduce_only: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub self_trade_prevention: Option<SelfTradePrevention>,
     pub side: Side,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub stop_loss_limit_price: Option<Decimal>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub stop_loss_trigger_by: Option<Decimal>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub stop_loss_trigger_price: Option<Decimal>,
     pub symbol: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub take_profit_limit_price: Option<Decimal>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub take_profit_trigger_by: Option<Decimal>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub take_profit_trigger_price: Option<Decimal>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub time_in_force: Option<TimeInForce>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -249,7 +274,9 @@ pub struct ExecuteOrderPayload {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub trigger_quantity: Option<TriggerQuantity>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub reduce_only: Option<bool>,
+    pub slippage_tolerance: Option<Decimal>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub slippage_tolerance_type: Option<SlippageToleranceType>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
