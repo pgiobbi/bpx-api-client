@@ -1,3 +1,4 @@
+use crate::order::Side;
 use rust_decimal::Decimal;
 use serde::{Deserialize, Serialize};
 
@@ -54,4 +55,36 @@ pub struct TradeUpdate {
     /// Is the buyer the maker?
     #[serde(rename = "m")]
     pub is_buyer_maker: bool,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct LiquidationUpdate {
+    /// Event type
+    #[serde(rename = "e")]
+    pub event_type: String,
+
+    /// Event timestamp in microseconds
+    #[serde(rename = "E")]
+    pub event_time: i64,
+
+    /// Symbol
+    #[serde(rename = "s")]
+    pub symbol: String,
+
+    /// Price
+    #[serde(rename = "p")]
+    pub price: Decimal,
+
+    /// Quantity
+    #[serde(rename = "q")]
+    pub quantity: Decimal,
+
+    /// Side
+    #[serde(rename = "S")]
+    pub side: Side,
+
+    /// Engine timestamp in microseconds
+    #[serde(rename = "T")]
+    pub timestamp: u64,
 }
