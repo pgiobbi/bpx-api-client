@@ -348,11 +348,11 @@ pub struct KlineUpdate {
 
     /// K-Line start time in seconds
     #[serde(rename = "t")]
-    pub start: i64,
+    pub start: chrono::NaiveDateTime,
 
     /// K-Line close time in seconds
     #[serde(rename = "T")]
-    pub end: i64,
+    pub end: chrono::NaiveDateTime,
 
     /// Open price
     #[serde(rename = "o")]
