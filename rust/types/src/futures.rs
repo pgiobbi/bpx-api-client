@@ -27,7 +27,7 @@ pub struct FuturePosition {
     pub user_id: u64,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 #[serde(rename_all = "camelCase")]
 pub enum PositionUpdateType {
     PositionAdjusted,
