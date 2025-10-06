@@ -283,6 +283,7 @@ pub struct OrderBookDepth {
     pub asks: Vec<(Decimal, Decimal)>,
     pub bids: Vec<(Decimal, Decimal)>,
     pub last_update_id: String,
+    pub timestamp: u64,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
