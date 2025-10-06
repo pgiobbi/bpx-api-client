@@ -31,14 +31,14 @@ pub struct AccountMaxBorrow {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct AccountMaxOrder {
-    pub(crate) auto_borrow: Option<bool>,
-    pub(crate) auto_borrow_repay: Option<bool>,
-    pub(crate) auto_lend_redeem: Option<bool>,
-    pub(crate) max_order_quantity: Decimal,
-    pub(crate) price: Option<Decimal>,
-    pub(crate) side: Side,
-    pub(crate) symbol: String,
-    pub(crate) reduce_only: Option<bool>,
+    pub auto_borrow: Option<bool>,
+    pub auto_borrow_repay: Option<bool>,
+    pub auto_lend_redeem: Option<bool>,
+    pub max_order_quantity: Decimal,
+    pub price: Option<Decimal>,
+    pub side: Side,
+    pub symbol: String,
+    pub reduce_only: Option<bool>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
