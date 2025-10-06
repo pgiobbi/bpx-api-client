@@ -1,8 +1,8 @@
+use crate::margin::MarginFunction;
+use crate::Blockchain;
 use rust_decimal::Decimal;
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumString};
-use crate::margin::MarginFunction;
-use crate::Blockchain;
 
 /// An asset is most of the time a crypto coin that can have multiple representations
 /// across different blockchains. For example, USDT.
@@ -21,6 +21,10 @@ pub struct Asset {
 pub enum MarketType {
     Spot,
     Perp,
+    Iperp,
+    Dated,
+    Prediction,
+    Rfq,
 }
 
 #[derive(Debug, Serialize, Deserialize)]

@@ -46,6 +46,7 @@ use routes::{
     futures::API_FUTURES_POSITION,
     order::{API_ORDER, API_ORDERS},
     rfq::{API_RFQ, API_RFQ_QUOTE},
+    strategies::{API_STRATEGY_HISTORY},
     user::API_USER_2FA,
 };
 use serde::Serialize;
@@ -271,6 +272,7 @@ impl BpxClient {
             API_ACCOUNT_MAX_ORDER if method == Method::GET => "maxOrderQuantity",
             API_ACCOUNT if method == Method::PATCH => "accountUpdate",
             API_ACCOUNT_CONVERT_DUST if method == Method::POST => "convertDust",
+            API_STRATEGY_HISTORY if method == Method::GET => "strategyHistoryQueryAll",
             _ => {
                 let req = self.client().request(method, url);
                 if let Some(payload) = payload {
