@@ -1,4 +1,6 @@
-use bpx_api_types::markets::{Asset, FundingRate, Kline, MarkPrice, Market, OrderBookDepth, Ticker};
+use bpx_api_types::markets::{
+    Asset, FundingRate, Kline, KlineInterval, KlinePriceType, MarkPrice, Market, OrderBookDepth, Ticker,
+};
 
 use crate::error::Result;
 use crate::BpxClient;
@@ -27,7 +29,7 @@ impl BpxClient {
         let res = self.get(url).await?;
         res.json().await.map_err(Into::into)
     }
-    
+
     /// Retrieves a list of available markets.
     pub async fn get_markets(&self) -> Result<Vec<Market>> {
         let url = format!("{}{}", self.base_url, API_MARKETS);
@@ -74,18 +76,21 @@ impl BpxClient {
     pub async fn get_k_lines(
         &self,
         symbol: &str,
-        kline_interval: &str,
-        start_time: Option<i64>,
+        interval: KlineInterval,
+        start_time: i64,
         end_time: Option<i64>,
+        price_type: Option<KlinePriceType>,
     ) -> Result<Vec<Kline>> {
         let mut url = format!(
-            "/{}{}?symbol={}&kline_interval={}",
-            self.base_url, API_KLINES, symbol, kline_interval
+            "{}{}?symbol={}&interval={}&startTime={}",
+            self.base_url, API_KLINES, symbol, interval, start_time
         );
-        for (k, v) in [("start_time", start_time), ("end_time", end_time)] {
-            if let Some(v) = v {
-                url.push_str(&format!("&{k}={v}"));
-            }
+
+        if let Some(end_time) = end_time {
+            url.push_str(&format!("&endTime={end_time}"));
+        }
+        if let Some(price_type) = price_type {
+            url.push_str(&format!("&priceType={price_type}"));
         }
         let res = self.get(url).await?;
         res.json().await.map_err(Into::into)

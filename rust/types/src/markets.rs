@@ -322,17 +322,63 @@ pub struct OrderBookDepthUpdate {
     pub bids: Vec<(Decimal, Decimal)>,
 }
 
+#[derive(Debug, Display, Clone, Copy, Serialize, Deserialize, EnumString, PartialEq, Eq, Hash)]
+#[strum(serialize_all = "UPPERCASE")]
+#[serde(rename_all = "UPPERCASE")]
+pub enum KlinePriceType {
+    Last,
+    Index,
+    Mark,
+}
+
+#[derive(Debug, Display, Clone, Copy, Serialize, Deserialize, EnumString, PartialEq, Eq, Hash)]
+#[strum(serialize_all = "UPPERCASE")]
+#[serde(rename_all = "UPPERCASE")]
+pub enum KlineInterval {
+    #[strum(serialize = "1m")]
+    OneMin,
+    #[strum(serialize = "3m")]
+    ThreeMin,
+    #[strum(serialize = "5m")]
+    FiveMin,
+    #[strum(serialize = "15m")]
+    FifteenMin,
+    #[strum(serialize = "30m")]
+    ThirtyMin,
+    #[strum(serialize = "1h")]
+    OneHour,
+    #[strum(serialize = "2h")]
+    TwoHour,
+    #[strum(serialize = "4h")]
+    FourHour,
+    #[strum(serialize = "6h")]
+    SixHour,
+    #[strum(serialize = "8h")]
+    EightHour,
+    #[strum(serialize = "12h")]
+    TwelveHour,
+    #[strum(serialize = "1d")]
+    OneDay,
+    #[strum(serialize = "3d")]
+    ThreeDay,
+    #[strum(serialize = "1w")]
+    OneWeek,
+    #[strum(serialize = "1month")]
+    OneMonth,
+}
+
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Kline {
     pub start: String,
+    pub end: String,
     pub open: Option<Decimal>,
     pub high: Option<Decimal>,
     pub low: Option<Decimal>,
     pub close: Option<Decimal>,
-    pub end: Option<String>,
     pub volume: Decimal,
-    pub trades: u64,
+    pub quote_volume: Decimal,
+    pub trades: String,
 }
 
 /// Ticker stream pushes 24hr rolling statistics for a single symbol every second.
