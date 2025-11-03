@@ -44,7 +44,7 @@ use routes::{
     borrow_lend::API_BORROW_LEND_POSITIONS,
     capital::{API_CAPITAL, API_COLLATERAL, API_DEPOSITS, API_DEPOSIT_ADDRESS, API_WITHDRAWALS},
     futures::API_FUTURES_POSITION,
-    history::API_FILL_HISTORY,
+    history::{API_FILL_HISTORY, API_ORDER_HISTORY},
     order::{API_ORDER, API_ORDERS},
     rfq::{API_RFQ, API_RFQ_QUOTE},
     strategies::API_STRATEGY_HISTORY,
@@ -275,6 +275,7 @@ impl BpxClient {
             API_ACCOUNT_CONVERT_DUST if method == Method::POST => "convertDust",
             API_STRATEGY_HISTORY if method == Method::GET => "strategyHistoryQueryAll",
             API_FILL_HISTORY if method == Method::GET => "fillHistoryQueryAll",
+            API_ORDER_HISTORY if method == Method::GET => "orderHistoryQueryAll",
             _ => {
                 let req = self.client().request(method, url);
                 if let Some(payload) = payload {
