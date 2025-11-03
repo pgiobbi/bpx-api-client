@@ -44,9 +44,10 @@ use routes::{
     borrow_lend::API_BORROW_LEND_POSITIONS,
     capital::{API_CAPITAL, API_COLLATERAL, API_DEPOSITS, API_DEPOSIT_ADDRESS, API_WITHDRAWALS},
     futures::API_FUTURES_POSITION,
+    history::API_FILL_HISTORY,
     order::{API_ORDER, API_ORDERS},
     rfq::{API_RFQ, API_RFQ_QUOTE},
-    strategies::{API_STRATEGY_HISTORY},
+    strategies::API_STRATEGY_HISTORY,
     user::API_USER_2FA,
 };
 use serde::Serialize;
@@ -273,6 +274,7 @@ impl BpxClient {
             API_ACCOUNT if method == Method::PATCH => "accountUpdate",
             API_ACCOUNT_CONVERT_DUST if method == Method::POST => "convertDust",
             API_STRATEGY_HISTORY if method == Method::GET => "strategyHistoryQueryAll",
+            API_FILL_HISTORY if method == Method::GET => "fillHistoryQueryAll",
             _ => {
                 let req = self.client().request(method, url);
                 if let Some(payload) = payload {

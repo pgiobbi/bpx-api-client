@@ -1,5 +1,6 @@
 use crate::markets::MarketType;
 use crate::order::{SelfTradePrevention, Side, SlippageToleranceType, TimeInForce};
+use crate::SortDirection;
 use rust_decimal::Decimal;
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumString};
@@ -42,14 +43,6 @@ impl StrategyHistorySearchParams {
     fn default_offset() -> Option<u64> {
         Some(0)
     }
-}
-
-#[derive(Debug, Display, Clone, Copy, Serialize, Deserialize, EnumString, PartialEq, Eq, Hash)]
-#[strum(serialize_all = "PascalCase")]
-#[serde(rename_all = "PascalCase")]
-pub enum SortDirection {
-    Asc,
-    Desc,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
